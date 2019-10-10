@@ -1,5 +1,4 @@
 const { format } = require('util')
-
 const levels = {
   trace: { rank: 1, color: 'white' },
   debug: { rank: 1, color: 'cyan' },
@@ -19,35 +18,50 @@ const colorMap = {
   inverse: '\x1b[7m'
 }
 
+const parse = arg => {
+  if (arg instanceof Error) {
+    return '\n\n' + format(arg) + '\n'
+  }
+  return format(arg)
+}
+const stdout = ({ date, pid, scope, level }, ...args) =>
+  process.stdout.write(
+    [
+      [date, pid, scope, colorize(level)].join(':'),
+      process.stdout.isTTY
+        ? [...args].map(parse)
+        : JSON.stringify([...args].map(arg => format(arg))),
+      '\n'
+    ].join('\t')
+  )
+const colorize = level =>
+  process.stdout.isTTY
+    ? `${colorMap[levels[level].color]}${level}\x1b[0m`
+    : level
+
 const createLogger = (
   scope,
-  { logLevel, outputStream = process.stdout, colors = process.stdout.isTTY } = {
-    outputStream: process.stdout,
-    colors: process.stdout.isTTY
+  { logLevel, log = stdout, colors = process.stdout.isTTY } = {
+    outputStream: process.stdout
   }
 ) => {
   if (!scope) throw new Error('You must provide a scope')
-  const colorize = level =>
-    colors ? `${colorMap[levels[level].color]}${level}\x1b[0m` : level
-  const log = {}
+
+  const logger = {}
 
   const writeLog = (level, ...args) => {
     if (!logLevel || levels[level].rank < levels[logLevel].rank) return null
-    outputStream.write(
-      [
-        `${new Date().toISOString()}:${process.pid}:${scope}:${colorize(
-          level
-        )}`,
-        JSON.stringify([...args].map(arg => format(arg)))
-      ].join('\t') + '\n'
+    log(
+      { date: new Date().toISOString(), pid: process.pid, scope, level },
+      ...args
     )
   }
 
   Object.keys(levels).forEach(level => {
-    log[level] = writeLog.bind(null, level)
+    logger[level] = writeLog.bind(null, level)
   })
 
-  return log
+  return logger
 }
 
 module.exports = createLogger
