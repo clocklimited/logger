@@ -1,0 +1,44 @@
+{
+  "author": "Paul Serby <paul@serby.net>",
+  "name": "logger",
+  "description": "Simple logger",
+  "version": "1.0.0",
+  "tags": [
+    "logging",
+    "logger"
+  ],
+  "scope": "@serby",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:serby/logger"
+  },
+  "license": "ISC",
+  "main": "./logger.js",
+  "files": [
+    "logger.js"
+  ],
+  "scripts": {
+    "lint:js": "eslint . --cache --ext '.js'",
+    "prettier": "prettier --write '**/*.{js}'",
+    "test": "jest",
+    "test:coverage": "jest --coverage --watch"
+  },
+  "engines": {
+    "node": ">=8.0.0"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "eslint": "^5.16.0",
+    "eslint-config-prettier": "^4.3.0",
+    "eslint-config-prettier-standard": "^2.0.0",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-plugin-import": "^2.17.2",
+    "eslint-plugin-node": "^9.0.1",
+    "eslint-plugin-prettier": "^3.1.0",
+    "eslint-plugin-promise": "^4.1.1",
+    "eslint-plugin-standard": "^4.0.0",
+    "jest": "^24.8.0",
+    "mockdate": "^2.0.5",
+    "prettier": "^1.17.1"
+  }
+}
