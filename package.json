@@ -1,6 +1,6 @@
 {
   "author": "Paul Serby <paul@serby.net>",
-  "name": "logger",
+  "name": "@serby/logger",
   "description": "Simple logger",
   "version": "1.0.0",
   "tags": [
