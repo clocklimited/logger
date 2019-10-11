@@ -1,40 +1,65 @@
 const createLogger = require('..')
-const { strictEqual } = require('assert')
+const { strictEqual, deepStrictEqual, ok } = require('assert')
 const mockdate = require('mockdate')
-const PassThrough = require('stream').PassThrough
 
 describe('logger', () => {
   beforeEach(() => mockdate.set('2001'))
   afterEach(() => mockdate.reset())
-  it('should contain scope and level ', done => {
-    const outputStream = new PassThrough()
-
-    outputStream.on('data', value =>
-      strictEqual(
-        value.toString(),
-        `2001-01-01T00:00:00.000Z:${process.pid}:app:info\t["foo"]\n`
-      )
-    )
-
+  it('should not log by default', done => {
     const logger = createLogger('app', {
-      logLevel: 'info',
-      outputStream,
-      colors: false
+      log: value => done(new Error())
     })
     logger.info('foo')
-    outputStream.end(done)
+    done()
   })
 
-  it('should not log by default', done => {
-    const outputStream = new PassThrough()
-
-    outputStream.on('data', value => done(new Error('Must never get called')))
-
+  it('should contain date, scope, pid and level in meta', done => {
     const logger = createLogger('app', {
-      outputStream
+      logLevel: 'info',
+      log: meta => {
+        deepStrictEqual(meta, {
+          date: new Date('2001-01-01T00:00:00.000Z'),
+          level: 'info',
+          pid: process.pid,
+          scope: 'app'
+        })
+        done()
+      }
     })
     logger.info('foo')
-    outputStream.end(done)
+  })
+
+  it('should contain extra data', done => {
+    const logger = createLogger('app', {
+      logLevel: 'info',
+      log: (meta, extra) => {
+        deepStrictEqual(extra, 'foo')
+        done()
+      }
+    })
+    logger.info('foo')
+  })
+
+  it('should allow many extra data arguments as objects and arrays', done => {
+    const logger = createLogger('app', {
+      logLevel: 'info',
+      log: (meta, ...extra) => {
+        deepStrictEqual(extra, [{ foo: 'bar' }, 42, 'foobar', [3, 1, 4, 1, 5]])
+        done()
+      }
+    })
+    logger.info({ foo: 'bar' }, 42, 'foobar', [3, 1, 4, 1, 5])
+  })
+
+  it('should allow extra data as error', done => {
+    const logger = createLogger('app', {
+      logLevel: 'info',
+      log: (meta, extra) => {
+        ok(extra instanceof Error)
+        done()
+      }
+    })
+    logger.info(new Error('Oh no!'))
   })
 
   it('should error on missing scope', done => {
@@ -47,24 +72,7 @@ describe('logger', () => {
     }
   })
 
-  it('should allow colors', done => {
-    const outputStream = new PassThrough()
-
-    outputStream.on('data', value =>
-      strictEqual(
-        value.toString(),
-        `2001-01-01T00:00:00.000Z:${
-          process.pid
-        }:app:\x1b[32minfo\x1b[0m\t["foo"]\n`
-      )
-    )
-
-    const logger = createLogger('app', {
-      outputStream,
-      logLevel: 'info',
-      colors: true
-    })
-    logger.info('foo')
-    outputStream.end(done)
+  it('should export stdoutProcessor', () => {
+    strictEqual(typeof createLogger.createStdOutProcessor, 'function')
   })
 })

@@ -11,10 +11,10 @@
 ## Usage
 
 ```js
+const createLogger = require('@serby/logger')
 const logger = createLogger('app', {
-  outputStream: process.stdout, // this is the default
-  logLevel: 'info', // Will default to no logging
-  colors: true // defaults to true on tty
+  log: processor // this is the default to a stdout processor
+  logLevel: 'info' // Will default to no logging
 })
 logger.trace('foo trace')
 logger.debug('foo debug')
