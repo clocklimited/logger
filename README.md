@@ -13,7 +13,7 @@
 ```js
 const createLogger = require('@serby/logger')
 const logger = createLogger('app', {
-  log: processor // this is the default to a stdout processor
+  processor, // this is the default to a stdout processor
   logLevel: 'info' // Will default to no logging
 })
 logger.trace('foo trace')
