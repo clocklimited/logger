@@ -2,7 +2,7 @@
   "author": "Paul Serby <paul@serby.net>",
   "name": "@serby/logger",
   "description": "Simple logger",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "tags": [
     "logging",
     "logger"
