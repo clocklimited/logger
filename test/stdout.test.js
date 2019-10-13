@@ -1,10 +1,13 @@
 const createStdOutProcessor = require('../lib/processors/stdout')
 const { strictEqual, ok } = require('assert')
+
+const color = require('../lib/color')
+
 describe('createStdOutProcessor', () => {
   it('should output as expected without color', done => {
     const mockStdOut = {
       write: value => {
-        strictEqual(value, '2001-01-01T00:00:00.000Z:2:3:4	message\n')
+        strictEqual(value, '2001-01-01T00:00:00.000Z	2	3	info  message\n')
         done()
       }
     }
@@ -13,7 +16,7 @@ describe('createStdOutProcessor', () => {
         date: new Date('2001'),
         pid: 2,
         scope: 3,
-        level: 4
+        level: 'info'
       },
       'message'
     )
@@ -24,7 +27,10 @@ describe('createStdOutProcessor', () => {
       write: value => {
         strictEqual(
           value,
-          '2001-01-01T00:00:00.000Z:2:3:\x1b[32minfo\x1b[0m	message\n'
+          `${color('grey', '00:00:00')} 2 ${color('cyan', '3')} ${color(
+            'green',
+            'info '
+          )} message\n`
         )
         done()
       },
@@ -44,12 +50,7 @@ describe('createStdOutProcessor', () => {
   it('should output error', done => {
     const mockStdOut = {
       write: value => {
-        ok(
-          value.includes(
-            '2001-01-01T00:00:00.000Z:2:3:info\t\n\nError: No oh!'
-          ),
-          value
-        )
+        ok(value.includes('Error: No oh!'), value)
         done()
       }
     }
